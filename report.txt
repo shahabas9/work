@@ -1,0 +1,54 @@
+import pymongo
+from pymongo import MongoClient
+import os
+import datetime
+import shutil
+import argparse
+import time
+import logging
+import sys
+
+client = MongoClient(host = ["localhost:27017"])
+
+save_ng = True
+save_OK = True
+save_maybe = True
+
+db = client['jidoka']
+Milk_data = db['Milk']
+batch_id_to_delete_ng =["18-1-2023-18-13-8"]
+jidoka_path = "/jidoka/v2.8.8"
+save = os.path.join("/jidoka/analysis",batch_id_to_delete_ng[0])
+
+
+
+for component_data in Milk_data.find():
+    num_images = len(component_data["images"])
+    batch_id = component_data["batch_id"]
+    if batch_id in batch_id_to_delete_ng:
+        for j in range(num_images):
+            img_decision = component_data["images"][j]['decision']
+            image_path1 = component_data["images"][j]['image_path']
+            if img_decision == 1:
+                classname = component_data["images"][0]["rejection_cause"]["algorithm"]["detection_classnames"][0]
+                image_path = os.path.join(jidoka_path,image_path1)
+                #image_path = image_path.split(".png")[0]+"_result_1.png"
+                print(image_path)
+                if save_ng:
+                    save_path = os.path.join(save,"NG",classname,image_path.split(batch_id_to_delete_ng[0]+"/")[1])
+                    try:
+                        os.makedirs(os.path.join(save,"NG",classname))
+                    except:pass
+                    try:
+                        shutil.copy(image_path,save_path)
+                    except:pass
+            elif img_decision == 2:
+                print(img_decision)
+                image_path = os.path.join(jidoka_path,image_path1)                
+                save_path = os.path.join(save,"MAYBE",image_path.split(batch_id_to_delete_ng[0]+"/")[1])
+                try:
+                    os.makedirs(os.path.join(save,"MAYBE"))
+                except:pass
+                try:
+                    shutil.copy(image_path,save_path)
+                except:pass            

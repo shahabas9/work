@@ -1,0 +1,20 @@
+inputpath : "/jidoka/workspace/jdisk2/Krishna/trigger_exp/single_ob1/VCXU-32C/VCXU-32C_700008191180_221226-152329/"
+
+
+image_format : ".jpg"
+
+
+Guassian_blur :
+  kernel_size : 5
+
+
+Canny_edges:
+  low_threshold : 50
+  high_threshold: 130
+
+
+HoughLine_Params:
+  rho           : 1
+  threshold     : 16
+  minLineLength : 50
+  maxLineGap    : 20
